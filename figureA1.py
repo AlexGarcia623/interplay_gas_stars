@@ -9,11 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm,ListedColormap
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
-sys.path.insert(1,'../')
-
 from plot_functions import get_Z_Mstar_SFR, ztoSnaps, sSFRcut
-
-sys.path.insert(1,'../Data/')
 
 
 mpl.rcParams['font.size']=18
@@ -27,7 +23,7 @@ redshift = 1
 
 SNAPS     = ztoSnaps[redshift]
 CMIN,CMAX = sSFRcut[redshift]
-dirs      = ['../Data/%s/snap%s/' %(SIMS[i],SNAPS[i]) for i in range(len(SIMS)) ]
+dirs      = ['./Data/%s/snap%s/' %(SIMS[i],SNAPS[i]) for i in range(len(SIMS)) ]
 
 
 fig, axs = plt.subplots(1, 3, figsize=(10,3.5), sharey=True, sharex=True)

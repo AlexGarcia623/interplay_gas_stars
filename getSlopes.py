@@ -25,7 +25,7 @@ kb     = 1.3806485E-16
 mc     = 1.270E-02
 Zsun   = 1.27E-02
 
-def get_slopes(sim,m_star_min=8.0, m_star_max=12.0, m_gas_min=8.5):
+def get_slopes(sim,m_star_min=8.0, m_star_max=12.0, m_gas_min=8.5, THRESHOLD=-5.00E-01):
     
     sim = sim.upper()
     
@@ -43,7 +43,7 @@ def get_slopes(sim,m_star_min=8.0, m_star_max=12.0, m_gas_min=8.5):
         gas_mass  = np.load( currentDir + 'Gas_Mass.npy' )
         SFR       = np.load( currentDir + 'SFR.npy' )
 
-        sfms_idx = sfmscut(star_mass, SFR)
+        sfms_idx = sfmscut(star_mass, SFR, THRESHOLD=THRESHOLD)
 
         desired_mask = ((star_mass > 1.00E+01**(m_star_min)) &
                         (star_mass < 1.00E+01**(m_star_max)) &

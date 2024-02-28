@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm,ListedColormap
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
-sys.path.insert(1,'../')
-
 from plot_functions import get_Z_Mstar_SFR, ztoSnaps, sSFRcut
 
 SAVEDIR = './Figures (pdf)/'
@@ -29,9 +27,9 @@ color_bins = np.linspace( CMIN,CMAX,spacing )
 newcolors = plt.cm.viridis(np.linspace(0, 1, len(color_bins)))
 newcmp    = ListedColormap(newcolors)
 
-_100_50_comp_dirs_ = ['../Data/TNG/snap%s/' %_100_50_snap_,
-                      '../Data/TNG50-1/snap%s/' %_100_50_snap_,
-                      '../Data/TNG50-2/snap%s/' %_100_50_snap_]
+_100_50_comp_dirs_ = ['./Data/TNG/snap%s/' %_100_50_snap_,
+                      './Data/TNG50-1/snap%s/' %_100_50_snap_,
+                      './Data/TNG50-2/snap%s/' %_100_50_snap_]
 _100_50_sim_names_ = [r'${\rm TNG}100-1$',r'${\rm TNG}50-1$',r'${\rm TNG}50-2$']
 
 for index, ax in enumerate(axs):
