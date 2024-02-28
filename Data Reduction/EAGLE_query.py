@@ -10,7 +10,7 @@ EAGLE_SQL_TOOLS = '/home/alexgarcia/github/eagleSqlTools'
 
 #########################################################################
 ################# YOU WILL PROBABLY HAVE TO CHANGE THIS #################
-savedir = '../blue_FMR/%s/data/' %WHICH_SIM
+savedir = '../Data/%s/' %WHICH_SIM
 #########################################################################
 
 SAVE_DATA = True

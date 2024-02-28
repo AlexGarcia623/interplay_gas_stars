@@ -12,7 +12,7 @@ SAVE_DATA = True
 
 #########################################################################
 ################# YOU WILL PROBABLY HAVE TO CHANGE THIS #################
-savedir = '../blue_FMR/%s/data/' %WHICH_SIM
+savedir = '../Data/%s/' %WHICH_SIM
 #########################################################################
 
 if not (path.exists(savedir)):
@@ -109,7 +109,8 @@ for snap in snaps:
     print(scf, z)
 
     print('Subhalos')
-    fields = ['SubhaloMassType','SubhaloSFR','SubhaloStarMetallicity','SubhaloGasMetallicity','SubhaloHalfmassRadType','SubhaloGasMetallicitySfr']
+    fields = ['SubhaloMassType','SubhaloSFR','SubhaloStarMetallicity',
+              'SubhaloGasMetallicity','SubhaloHalfmassRadType','SubhaloGasMetallicitySfr']
     sub_cat = il.groupcat.loadSubhalos(out_dir,snap,fields=fields)
 
     print('Halos')
@@ -142,7 +143,6 @@ for snap in snaps:
         np.save( currentDir+'Gas_Mass'    , np.array( gas_mass  [keep_mask] ) )
         np.save( currentDir+'R_gas'       , np.array( R_gas     [keep_mask] ) )
         np.save( currentDir+'R_star'      , np.array( R_star    [keep_mask] ) )
-
 
     print('Done with snap %s' %snap)
     print('\n')

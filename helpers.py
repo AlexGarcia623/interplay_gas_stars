@@ -39,7 +39,7 @@ def line(data, p1, p2):
     return p1*data + p2  
 
 def sfmscut(m0, sfr0, THRESHOLD=-5.00E-01,
-            m_star_min=8.0, m_star_max=10.5):
+            m_star_min=8.0, m_star_max=12.0):
     nsubs = len(m0)
     idx0  = np.arange(0, nsubs)
     non0  = ((m0   > 0.000E+00) & 

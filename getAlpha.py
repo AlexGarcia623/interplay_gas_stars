@@ -73,6 +73,44 @@ def switch_sim(WHICH_SIM):
             6 :'z=9',
             4 :'z=10',
         }
+    elif (WHICH_SIM.upper() == "TNG50-1"):
+        # TNG
+        run       = 'L35n2160TNG'
+        base      = '/orange/paul.torrey/IllustrisTNG/Runs/' + run + '/' 
+        out_dir   = base 
+        snapshots = [99,50,33,25,21,17,13,11,8] # 6,4
+        snap2z = {
+            99:'z=0',
+            50:'z=1',
+            33:'z=2',
+            25:'z=3',
+            21:'z=4',
+            17:'z=5',
+            13:'z=6',
+            11:'z=7',
+            8 :'z=8',
+            6 :'z=9',
+            4 :'z=10',
+        }
+    elif (WHICH_SIM.upper() == "TNG50-2"):
+        # TNG
+        run       = 'L35n1080TNG'
+        base      = '/orange/paul.torrey/IllustrisTNG/Runs/' + run + '/' 
+        out_dir   = base 
+        snapshots = [99,50,33,25,21,17,13,11,8] # 6,4
+        snap2z = {
+            99:'z=0',
+            50:'z=1',
+            33:'z=2',
+            25:'z=3',
+            21:'z=4',
+            17:'z=5',
+            13:'z=6',
+            11:'z=7',
+            8 :'z=8',
+            6 :'z=9',
+            4 :'z=10',
+        }
     elif (WHICH_SIM.upper() == "ORIGINAL"):
         # Illustris
         run       = 'L75n1820FP'
