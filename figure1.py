@@ -13,12 +13,12 @@ import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
 # Import from this library
-# from plot_functions import (
-#     get_Z_Mstar_SFR, ztoSnaps, sSFRcut
-# )
-# from Data.additional_data import (
-#     G05_masses, G05_metals, P08_masses, P08_metals
-# )
+from plot_functions import (
+    get_Z_Mstar_SFR, ztoSnaps, sSFRcut
+)
+from Data.additional_data import (
+    G05_masses, G05_metals, P08_masses, P08_metals
+)
 
 SAVEDIR = './Figures (pdf)/' # Where to save files
 
