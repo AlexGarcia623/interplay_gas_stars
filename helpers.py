@@ -1,3 +1,24 @@
+'''
+This module defines several useful functions for the analysis
+of this work
+#
+Functions:
+    - getMedians(mass,metals,width=0.1,step=0.05)
+        Get the medians metallicity within fixed mass bins
+        
+    - estimateSkew(data)
+        Use scipy's skewnorm.fit
+        
+    - line(data, p1, p2)
+        Defines a line
+        
+    - sfmscut(m0, sfr0, THRESHOLD=-5.00E-01,
+              m_star_min=8.0, m_star_max=12.0)
+        Compute specific star formation main sequence
+        
+Code written by: Alex Garcia, 2023-24
+'''
+# Standard Imports
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.stats import norm, skewnorm
@@ -7,6 +28,18 @@ m_star_max = 12.0
 m_gas_min  = 8.5
 
 def getMedians(mass,metals,width=0.1,step=0.05):
+    '''Get the medians metallicity within fixed mass bins
+    
+    Inputs:
+    - mass (ndarray): masses
+    - metals (ndarray): metallicities
+    - width (float): mass bin width
+    - step (float): mass bin step size
+    
+    Returns:
+    - (ndarray): median mass bins
+    - (ndarray): corresponding metallicity bins
+    '''
     start = np.min(mass)
     end   = np.max(mass)
     
@@ -16,30 +49,57 @@ def getMedians(mass,metals,width=0.1,step=0.05):
     masses  = []
     
     while (current < end + 2*step):
-        
         mask = ((mass > (current)) & (mass < (current + width)))
-        
         if (len(metals[mask]) > 10):
             medians.append( np.median( metals[mask] ) )
         else:
             medians.append( np.nan )
-            
         masses.append( current )
-    
         current += step
-        
     return np.array(masses),np.array(medians)
     
 def estimateSkew(data):
+    '''Use scipy's skewnorm.fit
+    
+    Inputs:
+    - data (ndarray): data to test
+    
+    Returns:
+    - (float, 3): skew parameters
+    '''
     a_estimate, loc_estimate, scale_estimate = skewnorm.fit(data)
     
     return a_estimate, loc_estimate, scale_estimate
     
 def line(data, p1, p2):
+    '''Defines a line
+    
+    Inputs:
+    - data (ndarray): x values
+    - p1 (float): slope
+    - p2 (float): intercept
+    
+    Returns:
+    - (ndarray) y values
+    '''
     return p1*data + p2  
 
 def sfmscut(m0, sfr0, THRESHOLD=-5.00E-01,
             m_star_min=8.0, m_star_max=12.0):
+    '''Compute specific star formation main sequence
+    
+    Adapted from Z.S.Hemler+(2021)
+    
+    Inputs:
+    - m0 (ndarray): mass array
+    - sfr0 (ndarray): SFR array
+    - THRESHOLD (float): value below which galaxies omitted
+    - m_star_min (float): minimum stellar mass
+    - m_star_max (float): maximum stellar mass
+    
+    Returns:
+    - (ndarray): boolean array of systems that meet criteria
+    '''
     nsubs = len(m0)
     idx0  = np.arange(0, nsubs)
     non0  = ((m0   > 0.000E+00) & 
@@ -79,11 +139,9 @@ def sfmscut(m0, sfr0, THRESHOLD=-5.00E-01,
     rdgstds    = np.array(rdgstds)
     mcs        = mbins[:-1] + mstp / 2.000E+00
     
-    # Alex added this as a quick bug fix, no idea if it's ``correct''
     nonans = (~(np.isnan(mcs)) &
               ~(np.isnan(rdgs)) &
               ~(np.isnan(rdgs)))
-        
     parms, cov = curve_fit(line, mcs[nonans], rdgs[nonans], sigma = rdgstds[nonans])
     mmin    = mbrk
     mmax    = m_star_max
@@ -106,3 +164,6 @@ def sfmscut(m0, sfr0, THRESHOLD=-5.00E-01,
     sfmsbool[idxbs] = 1
     sfmsbool = (sfmsbool == 1)
     return sfmsbool
+
+if __name__ == "__main__":
+    print("Hello World!")

@@ -14,7 +14,7 @@ from plot_functions import get_Z_Mstar_SFR, ztoSnaps, sSFRcut
 
 mpl.rcParams['font.size']=18
 
-SAVEDIR = './Figures (pdf)/'
+SAVEDIR = '../Figures (pdf)/'
 
 SIMS       = ['TNG','ORIGINAL','EAGLE']
 SIMS_NAMES = [r'${\rm TNG}$',r'${\rm Illustris}$',r'${\rm EAGLE}$']

@@ -1,21 +1,29 @@
-import sys
-import os
-import time
-import h5py
+'''
+This module defines a function for calculating slopes
+#
+Functions:
+    - get_slopes(sim,m_star_min=8.0, m_star_max=12.0,
+                 m_gas_min=8.5, THRESHOLD=-5.00E-01)
+        Get slope of offset in MZ*R vs MZgR 
+        
+Code written by: Alex Garcia, 2023-24
+'''
+# Standard Imports
 import numpy as np
 import matplotlib as mpl
 mpl.use('agg')
-import illustris_python as il
-
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm, ListedColormap
 import matplotlib.gridspec as gridspec
-
 from scipy.interpolate import interp1d
 from scipy.stats import ks_2samp, iqr
-
-from helpers import sfmscut, getMedians
-from getAlpha import switch_sim, whichSim2Tex
+# Import from this library
+from helpers import (
+    sfmscut, getMedians
+)
+from getAlpha import (
+    switch_sim, whichSim2Tex
+)
 
 h      = 6.774E-01
 xh     = 7.600E-01
@@ -25,8 +33,20 @@ kb     = 1.3806485E-16
 mc     = 1.270E-02
 Zsun   = 1.27E-02
 
-def get_slopes(sim,m_star_min=8.0, m_star_max=12.0, m_gas_min=8.5, THRESHOLD=-5.00E-01):
+def get_slopes(sim,m_star_min=8.0, m_star_max=12.0,
+               m_gas_min=8.5, THRESHOLD=-5.00E-01):
+    '''Get slope of offset in MZ*R vs MZgR 
     
+    Inputs
+    - sim (String): simulation name
+    - m_star_min (float): minimum stellar mass
+    - m_star_max (float): maximum stellar mass
+    - m_gas_min (float): minimum gas mass
+    - THRESHOLD (float): value for sSFMS cut
+    
+    Return:
+    - (ndarray): all slopes for current simulation
+    '''
     sim = sim.upper()
     
     snapshots, snap2z, DATA = switch_sim(sim)
@@ -34,7 +54,6 @@ def get_slopes(sim,m_star_min=8.0, m_star_max=12.0, m_gas_min=8.5, THRESHOLD=-5.
     slopes = np.zeros(len(snapshots))
     
     for gbl_index, snap in enumerate(snapshots):
-    
         currentDir = DATA + 'snap%s/' %snap
 
         Zgas      = np.load( currentDir + 'Zgas.npy' )
@@ -58,8 +77,7 @@ def get_slopes(sim,m_star_min=8.0, m_star_max=12.0, m_gas_min=8.5, THRESHOLD=-5.
 
         Zstar /= Zsun
         OH     = Zgas * (zo/xh) * (1.00/16.00)
-
-        Zgas      = np.log10(OH) + 12
+        Zgas   = np.log10(OH) + 12
 
         nonans    = ~(np.isnan(Zgas)) & ~(np.isnan(Zstar)) & (Zstar > 0.0) & (Zgas > 0.0) 
 

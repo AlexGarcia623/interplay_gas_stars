@@ -1,19 +1,26 @@
-import sys
+'''
+This file is used to create Figure 9 of "Interplay of Stellar
+and Gas-Phase Metallicities: Unveiling Insights for Stellar 
+Feedback Modeling with Illustris, IllustrisTNG, and EAGLE"
+
+Paper: https://ui.adsabs.harvard.edu/abs/2024MNRAS.tmp..787G/abstract
+
+Code written by: Alex Garcia, 2023-24
+'''
+# Standard imports
 import numpy as np
 import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
-
+# Import from this library
 from getSlopes import get_slopes
+from Data.additional_data import (
+    hlines, vals
+) ## additional data = output from Toy Model
 
-sys.path.insert(1,'./Data/')
+mpl.rcParams['font.size']=15 # Change fontsize for this file
 
-from additional_data import (hlines, vals)
-
-mpl.rcParams['font.size']=15
-
-SAVEDIR = './Figures (pdf)/'
-
+SAVEDIR = './Figures (pdf)/' # Where to save files
 
 fig = plt.figure(figsize=(7,3.5))
 
@@ -22,8 +29,6 @@ pred_slopes = hlines[np.argsort(vals)]
 
 plt.plot( np.log10(vals[np.argsort(vals)]), hlines[np.argsort(vals)], color='k', lw=2.5 )
 
-ax = plt.gca()
-
 EAGLE = get_slopes('eagle')
 ORIGINAL = get_slopes('original')
 TNG = get_slopes('tng')
@@ -31,22 +36,20 @@ TNG = get_slopes('tng')
 sims  = [TNG,EAGLE,ORIGINAL]
 clrs  = ['C2','C0','C1']
 for index,slopes in enumerate(sims):
-    
     sim = [
         np.log10(vals[ np.argmin(abs(np.max(slopes) - hlines ) ) ]),
         np.log10(vals[ np.argmin(abs(np.min(slopes) - hlines ) ) ])
-    ]
+    ] ## Calculate values closest to slopes
     plt.axvline( np.min(sim), color=clrs[index], lw=2 )
     plt.axvline( np.max(sim), color=clrs[index], lw=2 )
     alpha = 0.3
     if index == 1:
-        alpha = alpha+0.2
+        alpha = alpha+0.2 # Change specifically for EAGLE
     plt.axvspan( np.min(sim), np.max(sim), alpha=alpha, color=clrs[index])
 
-
-plt.text( 0.8, 0.5, r'${\rm EAGLE}$'    , transform=ax.transAxes, color='C0' )
-plt.text( 0.8, 0.4, r'${\rm Illustris}$', transform=ax.transAxes, color='C1' )
-plt.text( 0.8, 0.3, r'$\bf{\rm TNG}$'   , transform=ax.transAxes, color='C2' )
+plt.text( 0.8, 0.5, r'${\rm EAGLE}$'    , transform=plt.gca().transAxes, color='C0' )
+plt.text( 0.8, 0.4, r'${\rm Illustris}$', transform=plt.gca().transAxes, color='C1' )
+plt.text( 0.8, 0.3, r'$\bf{\rm TNG}$'   , transform=plt.gca().transAxes, color='C2' )
 
 ymin, ymax = -0.05,1.1
 plotlim = (np.min(np.log10(vals)),np.max(np.log10(vals)),
@@ -56,8 +59,8 @@ plt.imshow([[1,1],[0,0]], cmap=plt.cm.binary, interpolation='bicubic', extent=pl
 plt.xlabel(r'$\log\Gamma = \log\left({\tau_{\rm c}}/{\tau_{\rm SF}}\right)$')
 plt.ylabel(r'${\rm Slope}$')
 
-plt.text( 0.02, 0.8 , r'${\rm Stronger~ Correlation}$', transform=ax.transAxes)
-plt.text( 0.02, 0.21, r'${\rm Weaker~ Correlation}$', transform=ax.transAxes )
+plt.text( 0.02, 0.8 , r'${\rm Stronger~ Correlation}$', transform=plt.gca().transAxes)
+plt.text( 0.02, 0.21, r'${\rm Weaker~ Correlation}$', transform=plt.gca().transAxes )
 
 plt.ylim(ymin, ymax)
 

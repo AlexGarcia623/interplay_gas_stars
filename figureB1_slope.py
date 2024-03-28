@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from getSlopes import get_slopes
 
-SAVEDIR = './Figures (pdf)/'
+SAVEDIR = '../Figures (pdf)/'
 
 mpl.rcParams['font.size'] = 20
 fig, axs = plt.subplots(3, 1, figsize=(8,8), sharex=True, sharey=True)

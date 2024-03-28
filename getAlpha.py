@@ -1,28 +1,42 @@
-import sys
-import os
-import time
-import h5py
+'''
+This module sets matplotlib rcParams and defines several 
+functions useful for calculating alpha values
+#
+Functions:
+    - switch_sim(WHICH_SIM)
+        Get constants in order to switch which simulation to analyze
+        
+    - get_alpha(sim, m_star_min, m_star_max, m_gas_min=8.5, STARS_OR_GAS='stars',
+                polyorder=1,THRESHOLD=-5.00E-01)
+        Get the projection of minimum scatter
+        
+    - get_alpha_scatter(sim, m_star_min, m_star_max, m_gas_min=8.5,
+                        STARS_OR_GAS='gas',polyorder=1)
+        Same as get_alpha(...) but returns scatter values
+        
+    - plot(sim, name, redshift, m_star_min=8.0, m_star_max=12.0,
+           m_gas_min=8.5, STARS_OR_GAS='stars',polyorder=1,
+           THRESHOLD=-5.00E-01)
+        Used to create Figure 5
+        
+Code written by: Alex Garcia, 2023-24
+'''
+# Standard Imports
 import numpy as np
 import matplotlib as mpl
 mpl.use('agg')
-import illustris_python as il
-
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm, ListedColormap
 import matplotlib.gridspec as gridspec
-
 from scipy.interpolate import interp1d
 from scipy.stats import ks_2samp, iqr
-
+# Import from this library
 from helpers import sfmscut
 
-mpl.rcParams['text.usetex']        = True
-mpl.rcParams['font.family']        = 'serif'
-mpl.rcParams['font.size']          = 20
-
-fs_og = 20
-mpl.rcParams['font.size'] = fs_og
-mpl.rcParams['axes.linewidth'] = 2.25
+###### My Custom rcParams ######
+fontsize = 20
+mpl.rcParams['font.size'] = fontsize
+mpl.rcParams['axes.linewidth'] = 1.5
 mpl.rcParams['xtick.direction'] = 'in'
 mpl.rcParams['ytick.direction'] = 'in'
 mpl.rcParams['xtick.minor.visible'] = 'true'
@@ -37,12 +51,16 @@ mpl.rcParams['xtick.minor.size'] = 3.5
 mpl.rcParams['ytick.minor.size'] = 3.5
 mpl.rcParams['xtick.top'] = True
 mpl.rcParams['ytick.right'] = True
+mpl.rcParams['text.usetex'] = True
+mpl.rcParams['font.family'] = 'serif'
+mpl.rc('font',**{'family':'sans-serif','serif':['Times New Roman'],'size':15})
+mpl.rc('text', usetex=True)
+mpl.rcParams['text.usetex'] = True
+mpl.rcParams['font.size'] = 15
+###############################
 
 
-#########################################################################
-################# YOU WILL PROBABLY HAVE TO CHANGE THIS #################
 BLUE = './Data/'
-#########################################################################
 run, base, out_dir, snapshots = None, None, None, []
 snap2z = {}
 
@@ -52,7 +70,25 @@ whichSim2Tex = {
     'EAGLE'   :r'${\rm EAGLE}$'
 }
 
+h      = 6.774E-01
+xh     = 7.600E-01
+zo     = 3.500E-01
+mh     = 1.6726219E-24
+kb     = 1.3806485E-16
+mc     = 1.270E-02
+Zsun   = 1.27E-02
+
 def switch_sim(WHICH_SIM):
+    '''Get constants in order to switch which simulation to analyze
+    
+    Inputs:
+    - WHICH_SIM: any of (eagle, original, TNG, TNG50-1, TNG50-2])
+    
+    Returns
+    - (list): snapshots
+    - (dict): snap2z
+    - (String): location in Data
+    '''
     BLUE_DIR = BLUE + WHICH_SIM + "/"
     if (WHICH_SIM.upper() == "TNG"):
         # TNG
@@ -148,17 +184,24 @@ def switch_sim(WHICH_SIM):
         }
     return snapshots, snap2z, BLUE_DIR
 
-h      = 6.774E-01
-xh     = 7.600E-01
-zo     = 3.500E-01
-mh     = 1.6726219E-24
-kb     = 1.3806485E-16
-mc     = 1.270E-02
-Zsun   = 1.27E-02
-
 def get_alpha(sim, m_star_min, m_star_max, m_gas_min=8.5, STARS_OR_GAS='stars',
               polyorder=1,THRESHOLD=-5.00E-01):
+    '''Get the projection of minimum scatter
     
+    Inputs:
+    - sim (String): name of simulation (eagle, original, tng)
+    - m_star_min (float): minimum stellar mass 
+    - m_star_max (float): maximum stellar mass
+    - m_gas_min (float): minimum gas mass
+    - STARS_OR_GAS (String): Get stellar or gas-phase metallicity
+    - polyorder (int): Order of fitting polynomial
+    - THRESHOLD (float): threshold for sSFMS (see appendix of paper)
+    
+    Returns:
+    - (ndarray): all alpha values for the simulation
+    - (ndarray): all lower estimates for alpha
+    - (ndarray): all upper estimates for alpha
+    '''
     STARS_OR_GAS = STARS_OR_GAS.upper()
     
     snapshots, snap2z, BLUE_DIR = switch_sim(sim)
@@ -176,8 +219,6 @@ def get_alpha(sim, m_star_min, m_star_max, m_gas_min=8.5, STARS_OR_GAS='stars',
         star_mass = np.load( currentDir + 'Stellar_Mass.npy'  )
         gas_mass  = np.load( currentDir + 'Gas_Mass.npy' )
         SFR       = np.load( currentDir + 'SFR.npy' )
-        R_gas     = np.load( currentDir + 'R_gas.npy' )
-        R_star    = np.load( currentDir + 'R_star.npy' )
 
         # Nominal threshold = -5.000E-01
         sfms_idx = sfmscut(star_mass, SFR, THRESHOLD=THRESHOLD,
@@ -193,33 +234,21 @@ def get_alpha(sim, m_star_min, m_star_max, m_gas_min=8.5, STARS_OR_GAS='stars',
         SFR       = SFR      [desired_mask]
         Zstar     = Zstar    [desired_mask]
         Zgas      = Zgas     [desired_mask]
-        R_gas     = R_gas    [desired_mask]
-        R_star    = R_star   [desired_mask]
         
         Zstar /= Zsun
         OH     = Zgas * (zo/xh) * (1.00/16.00)
+        Zgas   = np.log10(OH) + 12
         
-        Zgas      = np.log10(OH) + 12
-        
-        # Get rid of nans and random values -np.inf
         nonans    = ~(np.isnan(Zgas)) & ~(np.isnan(Zstar)) & (Zstar > 0.0) & (Zgas > 0.0) 
         
-        sSFR      = SFR/star_mass
-
         gas_mass  = gas_mass [nonans]
         star_mass = star_mass[nonans]
         SFR       = SFR      [nonans]
-        sSFR      = sSFR     [nonans]
         Zstar     = Zstar    [nonans]
         Zgas      = Zgas     [nonans]
-        R_gas     = R_gas    [nonans]
-        R_star    = R_star   [nonans]
         
         star_mass = np.log10(star_mass)
         Zstar     = np.log10(Zstar)
-        
-        alphas = np.linspace(0,1,100)        
-        disps = np.ones(len(alphas)) * np.nan
                 
         if (STARS_OR_GAS == "GAS"):
             Z_use = Zgas
@@ -227,18 +256,17 @@ def get_alpha(sim, m_star_min, m_star_max, m_gas_min=8.5, STARS_OR_GAS='stars',
             Z_use = Zstar
         else:
             break
+            
+        alphas = np.linspace(0,1,100)        
+        disps = np.zeros(len(alphas))
         
         for index, alpha in enumerate(alphas):
+            mu_fit  = star_mass - alpha*np.log10( SFR )
 
-            muCurrent  = star_mass - alpha*np.log10( SFR )
-
-            mu_fit = muCurrent
-            Z_fit  = Z_use
-
-            popt = np.polyfit(mu_fit, Z_fit, polyorder)
+            popt = np.polyfit(mu_fit, Z_use, polyorder)
             interp = np.polyval( popt, mu_fit )
 
-            disps[index] = np.std( np.abs(Z_fit) - np.abs(interp) ) 
+            disps[index] = np.std( np.abs(Z_use) - np.abs(interp) ) 
 
         argmin = np.argmin(disps)
         min_alpha = alphas[argmin]
@@ -253,12 +281,27 @@ def get_alpha(sim, m_star_min, m_star_max, m_gas_min=8.5, STARS_OR_GAS='stars',
         
         min_alphas[gbl_index] = min_alpha
         low_errbar[gbl_index] = min_uncertain
-        hi_errbar [gbl_index]  = max_uncertain
+        hi_errbar [gbl_index] = max_uncertain
             
     return min_alphas, low_errbar, hi_errbar
     
 def get_alpha_scatter(sim, m_star_min, m_star_max, m_gas_min=8.5, STARS_OR_GAS='gas',
                       polyorder=1):
+    '''Same as get_alpha(...) but returns scatter values
+    
+    Inputs:
+    - sim (String): name of simulation (eagle, original, tng)
+    - m_star_min (float): minimum stellar mass 
+    - m_star_max (float): maximum stellar mass
+    - m_gas_min (float): minimum gas mass
+    - STARS_OR_GAS (String): Get stellar or gas-phase metallicity
+    - polyorder (int): Order of fitting polynomial
+    
+    Returns:
+    - (ndarray): all alpha values for the simulation
+    - (ndarray): all lower estimates for alpha
+    - (ndarray): all upper estimates for alpha
+    '''
     STARS_OR_GAS = STARS_OR_GAS.upper()
     
     snapshots, snap2z, BLUE_DIR = switch_sim(sim)
@@ -349,9 +392,26 @@ def get_alpha_scatter(sim, m_star_min, m_star_max, m_gas_min=8.5, STARS_OR_GAS='
     
     return scatter_local, scatter_global, scatter_MZR   
     
-def plot(sim, name, redshift, m_star_min=8.0, m_star_max=12.0, m_gas_min=8.5, STARS_OR_GAS='stars',
-         polyorder=1,THRESHOLD=-5.00E-01):
+def plot(sim, name, redshift, m_star_min=8.0, m_star_max=12.0,
+         m_gas_min=8.5, STARS_OR_GAS='stars',polyorder=1,
+         THRESHOLD=-5.00E-01):
+    '''Used to create Figure 5
     
+    Inputs:
+    - sim (String): name of simulation (eagle, original, tng)
+    - name (String): name and directory of output file
+    
+    Optional Inputs:
+    - m_star_min (float): minimum stellar mass = 8.0
+    - m_star_max (float): maximum stellar mass = 12.0
+    - m_gas_min (float): minimum gas mass = 8.5
+    - STARS_OR_GAS (String): Get stellar or gas-phase metallicity = "stars"
+    - polyorder (int): Order of fitting polynomial = 1
+    - THRESHOLD (float): threshold for sSFMS (see appendix of paper)
+    
+    Returns:
+    - (none): saves figure
+    '''
     STARS_OR_GAS = STARS_OR_GAS.upper()
     
     snapshots, snap2z, BLUE_DIR = switch_sim(sim)
@@ -368,9 +428,6 @@ def plot(sim, name, redshift, m_star_min=8.0, m_star_max=12.0, m_gas_min=8.5, ST
     star_mass = np.load( currentDir + 'Stellar_Mass.npy'  )
     gas_mass  = np.load( currentDir + 'Gas_Mass.npy' )
     SFR       = np.load( currentDir + 'SFR.npy' )
-    R_gas     = np.load( currentDir + 'R_gas.npy' )
-    R_star    = np.load( currentDir + 'R_star.npy' )
-
     sfms_idx = sfmscut(star_mass, SFR)
 
     desired_mask = ((star_mass > 1.00E+01**(m_star_min)) &
@@ -383,8 +440,6 @@ def plot(sim, name, redshift, m_star_min=8.0, m_star_max=12.0, m_gas_min=8.5, ST
     SFR       = SFR      [desired_mask]
     Zstar     = Zstar    [desired_mask]
     Zgas      = Zgas     [desired_mask]
-    R_gas     = R_gas    [desired_mask]
-    R_star    = R_star   [desired_mask]
 
     Zstar /= Zsun
     OH     = Zgas * (zo/xh) * (1.00/16.00)
@@ -401,8 +456,6 @@ def plot(sim, name, redshift, m_star_min=8.0, m_star_max=12.0, m_gas_min=8.5, ST
     sSFR      = sSFR     [nonans]
     Zstar     = Zstar    [nonans]
     Zgas      = Zgas     [nonans]
-    R_gas     = R_gas    [nonans]
-    R_star    = R_star   [nonans]
 
     star_mass = np.log10(star_mass)
     Zstar     = np.log10(Zstar)

@@ -8,7 +8,7 @@ from getAlpha import get_alpha
 
 m_star_min, m_star_max = 8.0, 12.0
 
-SAVEDIR = './Figures (pdf)/'
+SAVEDIR = '../Figures (pdf)/'
 
 mpl.rcParams['font.size'] = 20
 fig, axs = plt.subplots(3, 1, figsize=(8,8), sharex=True, sharey=True)

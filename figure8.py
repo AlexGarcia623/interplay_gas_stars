@@ -1,14 +1,23 @@
+'''
+This file is used to create Figure 8 of "Interplay of Stellar
+and Gas-Phase Metallicities: Unveiling Insights for Stellar 
+Feedback Modeling with Illustris, IllustrisTNG, and EAGLE"
+
+Paper: https://ui.adsabs.harvard.edu/abs/2024MNRAS.tmp..787G/abstract
+
+Code written by: Alex Garcia, 2023-24
+'''
+# Standard Imports
 import numpy as np
 import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
-
+# Import from this library
 from getSlopes import get_slopes
 
-mpl.rcParams['font.size']=16
+mpl.rcParams['font.size']=16 # Change font size for this file
 
-SAVEDIR = './Figures (pdf)/'
-
+SAVEDIR = '../Figures (pdf)/' # Where to save files
 
 fig = plt.figure(figsize=(8,4))
 
@@ -31,9 +40,7 @@ hlines = [0.11 ,0.67  ,0.38 ,0.75  ,0.56  ,0.9   ,0.96   ,0.02  ]
 vals   = [0.1*1,0.1*15,0.1*5,0.1*20,0.1*10,0.1*50,0.1*100,0.1/10]
 color  = ['k' for _ in range(len(hlines))]
 
-plt.ylim(-0.1,1.1)
 
-ax = plt.gca()
 for index, line in enumerate(hlines):
     plt.axhline(line, color=color[index],linestyle='--',alpha=0.5)
     
@@ -65,7 +72,4 @@ plt.text( 0.02, 0.11, r'${\rm Weaker~ Correlation}$'  , transform=plt.gca().tran
 plt.xticks(np.arange(0,9))
 
 plt.tight_layout()
-
 plt.savefig( SAVEDIR + "Figure8.pdf", bbox_inches='tight' )
-
-plt.show()

@@ -9,7 +9,7 @@ from matplotlib.colors import LogNorm,ListedColormap
 
 from plot_functions import get_Z_Mstar_SFR, fixed_M_bins, ztoSnaps, sSFRcut
 
-SAVEDIR = './Figures (pdf)/'
+SAVEDIR = '../Figures (pdf)/'
 
 SIMS       = ['TNG','ORIGINAL','EAGLE']
 SIMS_NAMES = [r'${\rm TNG}$',r'${\rm Illustris}$',r'${\rm EAGLE}$']

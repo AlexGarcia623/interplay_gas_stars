@@ -1,27 +1,37 @@
-import sys
+'''
+This file is used to create Figure 3 of "Interplay of Stellar
+and Gas-Phase Metallicities: Unveiling Insights for Stellar 
+Feedback Modeling with Illustris, IllustrisTNG, and EAGLE"
+
+Paper: https://ui.adsabs.harvard.edu/abs/2024MNRAS.tmp..787G/abstract
+
+Code written by: Alex Garcia, 2023-24
+'''
+# Standard Imports
 import numpy as np
 import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
-
 from matplotlib.colors import LogNorm,ListedColormap
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+# Import from this library
+from plot_functions import (
+    get_Z_Mstar_SFR, ztoSnaps, sSFRcut
+)
+from Data.additional_data import (
+    dr18_masses, dr18_metals, dr18_avg_sSFR
+)
 
-from plot_functions import get_Z_Mstar_SFR, ztoSnaps, sSFRcut
+mpl.rcParams['font.size']=18 ## Modify font size for this file only
 
-sys.path.insert(1,'./Data/')
+SAVEDIR = '../Figures (pdf)/' # Where to save files
 
-from additional_data import dr18_masses, dr18_metals, dr18_avg_sSFR
-
-mpl.rcParams['font.size']=18
-
-SAVEDIR = './Figures (pdf)/'
-
+# Simulation names (same as Data directories)
 SIMS       = ['TNG','ORIGINAL','EAGLE']
 SIMS_NAMES = [r'${\rm TNG}$',r'${\rm Illustris}$',r'${\rm EAGLE}$']
 
+# Get constants and set-up directories
 redshift = 0
-
 SNAPS     = ztoSnaps[redshift]
 CMIN,CMAX = sSFRcut[redshift]
 dirs      = ['./Data/%s/snap%s/' %(SIMS[i],SNAPS[i]) for i in range(len(SIMS)) ]
@@ -29,18 +39,16 @@ dirs      = ['./Data/%s/snap%s/' %(SIMS[i],SNAPS[i]) for i in range(len(SIMS)) ]
 
 fig, axs = plt.subplots(1, 3, figsize=(10,3.5), sharey=True, sharex=True)
 
-bins = 75
-
+# Make my own color map from viridis
 spacing = 5
 color_bins = np.linspace( CMIN,CMAX,spacing )
-
 newcolors = plt.cm.viridis(np.linspace(0, 1, len(color_bins)))
 newcmp = ListedColormap(newcolors)
 
 for index, ax in enumerate(axs):
     Zstar, Mstar, sSFR = get_Z_Mstar_SFR( dirs[index], which="stars" )
     
-    Hist1, xedges, yedges = np.histogram2d(Mstar,Zstar,weights=sSFR,bins=(bins,bins))
+    Hist1, xedges, yedges = np.histogram2d(Mstar,Zstar,weights=sSFR,bins=(75,75))
     Hist2, _     , _      = np.histogram2d(Mstar,Zstar,bins=[xedges,yedges])
 
     Hist1 = np.transpose(Hist1)
@@ -54,7 +62,8 @@ for index, ax in enumerate(axs):
     
     ax.set_xlabel(r'$\log\left(M_* ~[M_\odot]\right)$')
 
-    if ax == axs[2]:
+    if ax == axs[2] and redshift == 0:
+        ## Make inset axis for De Rossi + (2017) comparison at z=0
         axins = ax.inset_axes([0.35, 0.125, 0.6, 0.525], transform=None)
 
         norm = mpl.colors.Normalize(vmin=CMIN, vmax=CMAX)
@@ -81,16 +90,12 @@ for index, ax in enumerate(axs):
     
 fig.tight_layout()
 
-p0 = axs[0].get_position().get_points().flatten()
-p1 = axs[1].get_position().get_points().flatten()
-p2 = axs[2].get_position().get_points().flatten()
 ax_cbar = fig.add_axes([0.2, 1.02, 0.6, 0.05])
 
 cb = plt.colorbar(plot, cax=ax_cbar, ticks=np.linspace(CMIN,CMAX,spacing+1),
                           shrink=0.5,orientation='horizontal')
 cb.set_label(r'$\log({\rm sSFR}~[{\rm yr}^{-1}])$')
 
-# cb.ax.xaxis.set_ticks_position('top')
 cb.ax.xaxis.set_label_position('top')
 
 axs[0].set_ylabel(r'$\log(Z_*~[Z_\odot])$')
@@ -98,25 +103,3 @@ axs[0].set_ylabel(r'$\log(Z_*~[Z_\odot])$')
 axs[1].text( 0.75, 0.1, r'$z = %s$' %redshift, transform=axs[1].transAxes )
 
 fig.savefig( SAVEDIR + 'Figure3.pdf', bbox_inches="tight" )
-
-
-
-sub_res_ztoSnaps = {
-    0 :[99,99,99,135,135,135],
-    1 :[50,50,50,86,86,86],
-    2 :[33,33,33,68,68,68],
-    3 :[25,25,25,60,60,60],
-    4 :[21,21,21,54,54,54],
-    5 :[17,17,17,49,49,49],
-    6 :[13,13,13,45,45,45],
-    7 :[11,11,11,41,41,41],
-    8 :[8 ,8 ,8 ,38,38,38],
-    9 :[6 ,6 ,6 ,35,35,35],
-    10:[4 ,4 ,4 ,32,32,32]
-}
-sub_res_snaps = sub_res_ztoSnaps[redshift]
-
-sub_res = ['TNG','TNG-2','TNG-3','ORIGINAL','ORIGINAL-2','ORIGINAL-3']
-sub_res_names = [r'${\rm TNG}$',r'${\rm TNG}-2$',r'${\rm TNG}-3$',
-                 r'${\rm Illustris}$',r'${\rm Illustris}-2$',r'${\rm Illustris}-3$']
-sub_res_dirs = [ '../blue_FMR/%s/data/snap%s/' %(sub_res[i],sub_res_snaps[i]) for i in range(len(sub_res)) ]

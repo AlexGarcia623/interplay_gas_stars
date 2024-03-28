@@ -1,16 +1,34 @@
+'''
+This module sets matplotlib rcParams and defines several 
+functions useful for plotting
+#
+Functions:
+    - get_Z_Mstar_SFR(currentDir,which='stars')
+        Return Metallicity, Mass, and SFR from a given Data dir
+        
+    - medianZR(x, y, bins = 5, return_err_bars = False)
+        Get the median relation of x and y (used for MZR)
+        
+    - fixed_M_bins(mass,Z,sSFR,spacing=1.0,nbins=5):
+        Get Mass, Metallicity, sSFR in fixed mass bins
+        based on grouping of fixed sSFR bins
+        
+    - get_avg_scatter(x,y,bins=5)
+        Get the scatter in fixed "x" bins
+        
+Code written by: Alex Garcia, 2023-24
+'''
+# Standard Imports
 import numpy as np
 import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
-import h5py
-
 from scipy.interpolate import interp1d
 from scipy.stats import norm, skewnorm
-
+# Import from this library
 from helpers import sfmscut, getMedians
 
-# Custom rcParams
-
+###### My Custom rcParams ######
 mpl.rcParams['font.size'] = 15
 mpl.rcParams['axes.linewidth'] = 1.5
 mpl.rcParams['xtick.direction'] = 'in'
@@ -26,15 +44,14 @@ mpl.rcParams['ytick.major.size'] = 7.5
 mpl.rcParams['xtick.minor.size'] = 3.5
 mpl.rcParams['ytick.minor.size'] = 3.5
 mpl.rcParams['xtick.top'] = True
-mpl.rcParams['ytick.right'] = True    
-# %set_env MANPATH=/home/paul.torrey/local/texlive/2018/texmf-dist/doc/man:$MANPATH
-# %set_env INFOPATH=/home/paul.torrey/local/texlive/2018/texmf-dist/doc/info:$INFOPATH
-# %set_env PATH=/home/paul.torrey/local/texlive/2018/bin/x86_64-linux:/home/paul.torrey/local/texlive/2018/texmf-dist:$PATH
-mpl.rcParams['text.usetex']        = True
-# mpl.rcParams['text.latex.unicode'] = True
-mpl.rcParams['font.family']        = 'serif'
+mpl.rcParams['ytick.right'] = True
+mpl.rcParams['text.usetex'] = True
+mpl.rcParams['font.family'] = 'serif'
 mpl.rc('font',**{'family':'sans-serif','serif':['Times New Roman'],'size':15})
 mpl.rc('text', usetex=True)
+mpl.rcParams['text.usetex'] = True
+mpl.rcParams['font.size'] = 15
+###############################
 
 m_star_min = 8.0
 m_star_max = 12.0
@@ -48,6 +65,8 @@ kb     = 1.3806485E-16
 mc     = 1.270E-02
 Zsun   = 1.27E-02
 
+## Convert from redshift to snapshot for each simulation
+# [TNG, Illustris, EAGLE]
 ztoSnaps = {
     0 :[99,135,28],
     1 :[50,86,19],
@@ -61,6 +80,8 @@ ztoSnaps = {
     9 :[6 ,35,3 ],
     10:[4 ,32,2 ]
 }
+## Color cuts for plots based on specific SFR
+# redshift: (min sSFR, max sSFR)
 sSFRcut = {
     0 :(-10.5,-9.5),
     1 :(-10,-9),
@@ -76,16 +97,22 @@ sSFRcut = {
 }
 
 def get_Z_Mstar_SFR(currentDir,which='stars'):
+    '''Return Metallicity, Mass, and SFR from a given
+    Data dir. 
+    Note this function includes a star formation main 
+    sequence cut
     
+    Inputs:
+    - currentDir (String): Directory containing .npy files
+    - which (String): Optional - get Stellar Metallicity
+                                 or gas-phase Metallicity
+    
+    Outputs:
+    - (ndarray): Metallicity (gas or stars)
+    - (ndarray): Stellar Mass
+    - (ndarray): Star Formation Rates
+    '''
     which=which.upper()
-    
-    h      = 6.774E-01
-    xh     = 7.600E-01
-    zo     = 3.500E-01
-    mh     = 1.6726219E-24
-    kb     = 1.3806485E-16
-    mc     = 1.270E-02
-    Zsun   = 1.27E-02
     
     Zgas      = np.load( currentDir + 'Zgas.npy' )
     Zstar     = np.load( currentDir + 'Zstar.npy' ) 
@@ -130,55 +157,61 @@ def get_Z_Mstar_SFR(currentDir,which='stars'):
         return Zstar, star_mass, sSFR
     elif which == "GAS":
         return Zgas, star_mass, sSFR
+
+def medianZR(x, y, bins = 5, return_err_bars = False):
+    '''Get the median relation of x and y (used for MZR)
     
+    Inputs:
+    - x (ndarray): all x values
+    - y (ndarray): all y values
+    - bins (int): number of bins to make
+    - return_err_bars (bool): return error bars or not
     
-def fixed_sSFR_bins(mass,Z,sSFR, nBins=4):
+    Outputs:
+    - (ndarray) bin centers (x values)
+    - (ndarray) bin values (y values)
+    - (ndarray) bin errors (if return_err_bars = True)
+    '''
+    start = np.min(x)
+    end   = np.max(x)
     
-    start = np.percentile(sSFR,5)
-    end   = np.percentile(sSFR,95)
+    bin_centers = np.linspace(start,end,bins)
+    binWidth = (end - start) / bins
     
-    binWidth = (end - start) / nBins
+    bin_vals = np.ones(len(bin_centers))
+    bin_errs = np.ones(len(bin_centers))
+    
+    for index, current in enumerate(bin_centers):
+        mask = ((x > current - binWidth/2) & (x < current + binWidth/2))
         
-    current = start
+        if (sum(mask) < 10):
+            bin_vals[index] = np.nan
+            bin_errs[index] = np.nan
+        else:
+            bin_vals[index] = np.nanmedian( y[mask] )
+            bin_errs[index] = np.nanstd( y[mask] )
     
-    index = 0
-    
-    mbin0 = 8.0
-    mbin1 = 8.5
-    mbin2 = 9.0
-    mbin3 = 9.5
-    mbin4 = 10.0
-    mbin5 = 10.5
-    mbin6 = 11.0
-    mbins = [mbin0,mbin1,mbin2,mbin3,mbin4,mbin5,mbin6]
-    
-    fixed_mass = np.ones( (nBins,len(mbins)) )
-    fixed_Z    = np.ones( (nBins,len(mbins)) )
-    fixed_sSFR = np.ones( nBins )
-    while (current < end - binWidth/2):
-        within_bin = ( (sSFR > current) & (sSFR < current + binWidth) )
-        
-        c_mass = mass[within_bin]
-        c_Z    =    Z[within_bin]
-                
-        Z0 = np.nanmedian( c_Z[ (c_mass > mbin0) & (c_mass < mbin1) ] )
-        Z1 = np.nanmedian( c_Z[ (c_mass > mbin1) & (c_mass < mbin2) ] )
-        Z2 = np.nanmedian( c_Z[ (c_mass > mbin2) & (c_mass < mbin3) ] )
-        Z3 = np.nanmedian( c_Z[ (c_mass > mbin3) & (c_mass < mbin4) ] )
-        Z4 = np.nanmedian( c_Z[ (c_mass > mbin4) & (c_mass < mbin5) ] )
-        Z5 = np.nanmedian( c_Z[ (c_mass > mbin5) & (c_mass < mbin6) ] )
-        Z6 = np.nanmedian( c_Z[ (c_mass > mbin6) ] )
-        
-        fixed_Z[index], fixed_mass[index] = [Z0,Z1,Z2,Z3,Z4,Z5,Z6] , mbins 
-        
-        fixed_sSFR[index] = current
-        current += binWidth
-        index += 1
-        
-    return fixed_mass, fixed_Z, fixed_sSFR
+    if return_err_bars:
+        return bin_centers, bin_vals, bin_errs
+    else:
+        return bin_centers, bin_vals
 
 def fixed_M_bins(mass,Z,sSFR,spacing=1.0,nbins=5):
+    '''Get Mass, Metallicity, sSFR in fixed mass bins
+    based on grouping of fixed sSFR bins
     
+    Inputs:
+    - mass (ndarray): all masses
+    - Z (ndarray): all metallicities
+    - sSFR (ndarray): all specific SFRs
+    - spacing (float): spacing between mass bins
+    - nbins (int): number of mass bins for sSFR
+    
+    Returns:
+    - (ndarray): mass bins (m, 1)
+    - (ndarray): metallicity bins (m, n)
+    - (ndarray): sSFR bins (m, n)
+    '''
     mbins = np.arange( 8.0,12.0,spacing )
     start = 8.0
     end   = 12.0
@@ -215,56 +248,22 @@ def fixed_M_bins(mass,Z,sSFR,spacing=1.0,nbins=5):
         
     return fixed_mass, fixed_Z, fixed_sSFR
 
-def get_avg_scatter(x,y,bins=5):
-    start = np.min(x)
-    end   = np.max(x)
-    
-    bin_centers = np.linspace(start,end,bins)
-    binWidth = (end - start) / bins
-    
-    bin_vals = np.ones(len(bin_centers))
-    bin_disp = np.ones(len(bin_centers))
-    
-    for index, current in enumerate(bin_centers):
-        mask = ((x > current - binWidth/2) & (x < current + binWidth/2))
-        
-        if (sum(mask) < 10):
-            bin_vals[index] = np.nan
-            bin_disp[index] = np.nan
-        else:
-            bin_vals[index] = np.nanmedian( y[mask] )
-            bin_disp[index] = np.nanstd( y[mask] )
-        
-    return bin_centers, bin_vals, bin_disp
-
-def medianZR( x, y, bins = 5, return_err_bars = False ):
-    
-    start = np.min(x)
-    end   = np.max(x)
-    
-    bin_centers = np.linspace(start,end,bins)
-    binWidth = (end - start) / bins
-    
-    bin_vals = np.ones(len(bin_centers))
-    bin_errs = np.ones(len(bin_centers))
-    
-    for index, current in enumerate(bin_centers):
-        mask = ((x > current - binWidth/2) & (x < current + binWidth/2))
-        
-        if (sum(mask) < 10):
-            bin_vals[index] = np.nan
-            bin_errs[index] = np.nan
-        else:
-            bin_vals[index] = np.nanmedian( y[mask] )
-            bin_errs[index] = np.nanstd( y[mask] )
-    
-    if return_err_bars:
-        return bin_centers, bin_vals, bin_errs
-    else:
-        return bin_centers, bin_vals
-    
 def getScatter(x, y, nbins = 10, func=np.median, percLow = 1, percHigh=99):
+    '''Get scatter in x
     
+    Inputs:
+    - x (ndarray): x values
+    - y (ndarray): y values
+    - nbins (int): number of x bins
+    - func (func): what type of bins (median, mean, etc)
+    - percLow (int): lower percentile (remove weird outliers for plotting purposes)
+    - percHigh (int): higher percentile
+    
+    Return:
+    - (ndarray): bin locations (x values)
+    - (ndarray): bin medians (y values)
+    - (ndarray): scatter in x direction
+    '''
     binWidth = ( np.percentile(x,percHigh) - np.percentile(x,percLow) ) / nbins
     
     start = np.percentile(x,percLow) + binWidth/2
@@ -291,10 +290,58 @@ def getScatter(x, y, nbins = 10, func=np.median, percLow = 1, percHigh=99):
         index += 1
         current += binWidth
     
-    return binLocs, medians,devs#func(devs), func(weightDevs)/len(y)
+    return binLocs, medians, devs
 
-def skew(DATA, ax_histx, ax, WHICH_SIM, snap, snap2z, labelsOff=False):
+
+def get_avg_scatter(x,y,bins=5):
+    #### NOT USED???? ####
+    '''Get the scatter in fixed "x" bins
     
+    Inputs:
+    - x (ndarray): values on x-axis
+    - y (ndarray): values on y-axis
+    
+    Outputs:
+    - (ndarray): bin centers (x axis)
+    - (ndarray): bin values (y axis)
+    - (ndarray): bin disperson (scatter about x axis)
+    '''
+    start = np.min(x)
+    end   = np.max(x)
+    
+    bin_centers = np.linspace(start,end,bins)
+    binWidth = (end - start) / bins
+    
+    bin_vals = np.ones(len(bin_centers))
+    bin_disp = np.ones(len(bin_centers))
+    
+    for index, current in enumerate(bin_centers):
+        mask = ((x > current - binWidth/2) & (x < current + binWidth/2))
+        
+        if (sum(mask) < 10):
+            bin_vals[index] = np.nan
+            bin_disp[index] = np.nan
+        else:
+            bin_vals[index] = np.nanmedian( y[mask] )
+            bin_disp[index] = np.nanstd( y[mask] )
+        
+    return bin_centers, bin_vals, bin_disp
+    
+def skew(DATA, ax_histx, ax, WHICH_SIM, snap, snap2z, labelsOff=False):
+    '''Give axes make a plot with skew information
+    
+    Inputs:
+    - DATA (String): Directory
+    - ax_histx (mpl ax): axis for histogram
+    - ax (mpl ax): axis for normal plot
+    - WHICH_SIM (String): simulation name
+    - snap (int): simulation snapshot
+    - snap2z (dict): conversion table from snapshot to redshift
+    - labelsOff (bool): Turn labels on or off
+    
+    Returns:
+    - (none)
+    '''
     currentDir = DATA + 'snap%s/' %snap
 
     Zgas      = np.load( currentDir + 'Zgas.npy' )
@@ -436,3 +483,83 @@ def skew(DATA, ax_histx, ax, WHICH_SIM, snap, snap2z, labelsOff=False):
         ax.set_yticklabels([])
     else:
         ax.set_ylabel(r'$\Delta Z_*$')
+    
+def fixed_sSFR_bins(mass,Z,sSFR, nBins=4):
+    '''
+    
+    '''
+    start = np.percentile(sSFR,5)
+    end   = np.percentile(sSFR,95)
+    
+    binWidth = (end - start) / nBins
+        
+    current = start
+    
+    index = 0
+    
+    mbin0 = 8.0
+    mbin1 = 8.5
+    mbin2 = 9.0
+    mbin3 = 9.5
+    mbin4 = 10.0
+    mbin5 = 10.5
+    mbin6 = 11.0
+    mbins = [mbin0,mbin1,mbin2,mbin3,mbin4,mbin5,mbin6]
+    
+    fixed_mass = np.ones( (nBins,len(mbins)) )
+    fixed_Z    = np.ones( (nBins,len(mbins)) )
+    fixed_sSFR = np.ones( nBins )
+    while (current < end - binWidth/2):
+        within_bin = ( (sSFR > current) & (sSFR < current + binWidth) )
+        
+        c_mass = mass[within_bin]
+        c_Z    =    Z[within_bin]
+                
+        Z0 = np.nanmedian( c_Z[ (c_mass > mbin0) & (c_mass < mbin1) ] )
+        Z1 = np.nanmedian( c_Z[ (c_mass > mbin1) & (c_mass < mbin2) ] )
+        Z2 = np.nanmedian( c_Z[ (c_mass > mbin2) & (c_mass < mbin3) ] )
+        Z3 = np.nanmedian( c_Z[ (c_mass > mbin3) & (c_mass < mbin4) ] )
+        Z4 = np.nanmedian( c_Z[ (c_mass > mbin4) & (c_mass < mbin5) ] )
+        Z5 = np.nanmedian( c_Z[ (c_mass > mbin5) & (c_mass < mbin6) ] )
+        Z6 = np.nanmedian( c_Z[ (c_mass > mbin6) ] )
+        
+        fixed_Z[index], fixed_mass[index] = [Z0,Z1,Z2,Z3,Z4,Z5,Z6] , mbins 
+        
+        fixed_sSFR[index] = current
+        current += binWidth
+        index += 1
+        
+    return fixed_mass, fixed_Z, fixed_sSFR
+    
+def getScatter(x, y, nbins = 10, func=np.median, percLow = 1, percHigh=99):
+    
+    binWidth = ( np.percentile(x,percHigh) - np.percentile(x,percLow) ) / nbins
+    
+    start = np.percentile(x,percLow) + binWidth/2
+    end   = np.percentile(x,percHigh)
+    
+    current = start
+    
+    devs       = np.ones(nbins) * np.nan
+    weightDevs = np.ones(nbins) * np.nan
+    binLocs    = np.ones(nbins) * np.nan
+    medians    = np.ones(nbins) * np.nan
+    
+    index = 0
+    while (current < end):
+        
+        mask = ( (x < current + binWidth/2) &
+                 (x > current - binWidth/2) )
+                
+        medians[index]    = np.median( y[mask] )
+        devs[index]       = np.std( y[mask] )
+        weightDevs[index] = np.std( y[mask] * sum(mask) ) 
+        binLocs[index]    = current
+        
+        index += 1
+        current += binWidth
+    
+    return binLocs, medians, devs
+        
+if __name__ == "__main__":
+    print('Hello World!')

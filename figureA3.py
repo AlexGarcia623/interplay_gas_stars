@@ -9,7 +9,7 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 from plot_functions import get_Z_Mstar_SFR, ztoSnaps, sSFRcut
 
-SAVEDIR = './Figures (pdf)/'
+SAVEDIR = '../Figures (pdf)/'
 
 fig, axs = plt.subplots(1, 3, figsize=(10,3.5), sharey=True, sharex=True)
 

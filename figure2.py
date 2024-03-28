@@ -1,67 +1,60 @@
-import sys
+'''
+This file is used to create Figure 1 of "Interplay of Stellar
+and Gas-Phase Metallicities: Unveiling Insights for Stellar 
+Feedback Modeling with Illustris, IllustrisTNG, and EAGLE"
+
+Paper: https://ui.adsabs.harvard.edu/abs/2024MNRAS.tmp..787G/abstract
+
+Code written by: Alex Garcia, 2023-24
+'''
+# Standard Imports
 import numpy as np
 import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
-
-from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
 
-from plot_functions import get_Z_Mstar_SFR, medianZR, ztoSnaps, sSFRcut
+# Import from this library
+from plot_functions import (
+    get_Z_Mstar_SFR, medianZR, ztoSnaps, sSFRcut
+)
+from Data.additional_data import (
+    G05_masses, G05_metals, C19_masses, C19_metals, K22_masses, K22_metals
+)
 
-sys.path.insert(1,'./Data/')
+SAVEDIR = '../Figures (pdf)/' # Where to save files
 
-from additional_data import (G05_masses, G05_metals, C19_masses, C19_metals, K22_masses, K22_metals)
+# Simulation names (same as Data directories)
+SIMS = ['TNG','ORIGINAL','EAGLE']
+SIMS_NAMES = [r'${\rm TNG}$',r'${\rm Illustris}$',r'${\rm EAGLE}$'] # TeX
 
-SAVEDIR = './Figures (pdf)/'
-
-SIMS       = ['TNG','ORIGINAL','EAGLE']
-SIMS_NAMES = [r'${\rm TNG}$',r'${\rm Illustris}$',r'${\rm EAGLE}$']
-
-redshift = 0
-
-SNAPS     = ztoSnaps[redshift]
-CMIN,CMAX = sSFRcut[redshift]
-dirs      = ['./Data/%s/snap%s/' %(SIMS[i],SNAPS[i]) for i in range(len(SIMS)) ]
-
-
+# Create Figure
 fig, axs = plt.subplots(1, 3, figsize=(10,3.5), sharey=True, sharex=True)
 
-bins = 60
+zs = np.arange(0,9,dtype=int)
 
-zs=[0,1,2,3,4,5,6,7,8,9,10]
 for redshift in zs:
-    if (redshift > 8):
-        continue
-    
-    SNAPS = ztoSnaps[redshift]
+    snaps = ztoSnaps[redshift]
 
-    dirs = ['./Data/%s/snap%s/' %(SIMS[i],SNAPS[i]) for i in range(len(SIMS)) ]
+    dirs = ['./Data/%s/snap%s/' %(SIMS[i],snaps[i]) for i in range(len(SIMS)) ]
 
     for index, ax in enumerate(axs):
         Zstar, Mstar, sSFR = get_Z_Mstar_SFR( dirs[index], which='stars' )
 
         bin_centers, bin_vals, bin_errs = medianZR( Mstar, Zstar, bins=10, return_err_bars=True )
-
-        if (index==0):
-            text = 'TNG'
-        elif (index==1):
-            text = 'Illustris'
-        else:
-            text = 'EAGLE'
                 
         color = 'C' + str(redshift)
         
         if (redshift == 0):
+            # Plot this only once
             ax.plot( G05_masses, G05_metals, color='k', linestyle='--' )
             ax.plot( K22_masses, K22_metals, color='k', linestyle=':' )
             ax.scatter( C19_masses, C19_metals, color='k' )
+            ax.text( 0.075, 0.9, SIMS_NAMES[index], transform=ax.transAxes )
         
         ax.fill_between( bin_centers, bin_vals - bin_errs, bin_vals + bin_errs, alpha=0.15 )
         ax.plot( bin_centers, bin_vals, lw=3, color=color, label=r'$z=%s$' %redshift )
         
-        if (redshift == 0):
-            ax.text( 0.075, 0.9, SIMS_NAMES[index], transform=ax.transAxes )
         ax.set_xlabel(r'$\log\left(M_* ~[M_\odot]\right)$')
 
 ymin,ymax = axs[0].get_ylim()
@@ -75,7 +68,7 @@ leg = axs[2].legend(frameon=False,labelspacing=0.05,
 
 for i in range(len(leg.get_texts())): leg.legendHandles[i].set_visible(False)
 
-colors = ['C' + str(i) for i in range(0,9)] + ['k'] + ['teal']
+colors = ['C' + str(i) for i in range(0,9)]
 for index, text in enumerate(leg.get_texts()):
     text.set_color(colors[index])
 
