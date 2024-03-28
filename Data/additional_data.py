@@ -1,3 +1,9 @@
+'''Additional Data for some plots
+
+
+All credit given to original authors both here and in the paper.
+See the paper for full details
+'''
 import numpy as np
 
 ## De Rossi + (2018)

@@ -13,8 +13,11 @@ import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
 # Import from this library
-from getSlopes import get_slopes
-from Data.additional_data import (
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
+
+from interplay_gas_stars.getSlopes import get_slopes
+from interplay_gas_stars.Data.additional_data import (
     hlines, vals
 ) ## additional data = output from Toy Model
 

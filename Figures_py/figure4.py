@@ -14,11 +14,14 @@ mpl.use('agg')
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm,ListedColormap
 # Import from this library
-from plot_functions import (
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
+
+from interplay_gas_stars.plot_functions import (
     get_Z_Mstar_SFR, fixed_M_bins, ztoSnaps, sSFRcut
 )
 
-SAVEDIR = '../Figures (pdf)/' # Where to save files
+SAVEDIR = './Figures (pdf)/' # Where to save files
 
 # Simulation names (same as Data directories)
 SIMS = ['TNG','ORIGINAL','EAGLE']

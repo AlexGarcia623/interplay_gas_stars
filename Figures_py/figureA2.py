@@ -7,9 +7,14 @@ import matplotlib.pyplot as plt
 
 from matplotlib.colors import LogNorm,ListedColormap
 
-from plot_functions import get_Z_Mstar_SFR, fixed_M_bins, ztoSnaps, sSFRcut
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
 
-SAVEDIR = '../Figures (pdf)/'
+from interplay_gas_stars.plot_functions import (
+    get_Z_Mstar_SFR, fixed_M_bins, ztoSnaps, sSFRcut
+)
+
+SAVEDIR = './Figures (pdf)/'
 
 SIMS       = ['TNG','ORIGINAL','EAGLE']
 SIMS_NAMES = [r'${\rm TNG}$',r'${\rm Illustris}$',r'${\rm EAGLE}$']
@@ -22,8 +27,6 @@ dirs      = ['./Data/%s/snap%s/' %(SIMS[i],SNAPS[i]) for i in range(len(SIMS)) ]
 
 fig, axs = plt.subplots(1, 3, figsize=(10,3.5), sharey=True, sharex=True)
 
-bins = 75
-
 mass_spacing = 1.0
 mbins = np.arange( 8.0,12.0,mass_spacing )
 
@@ -35,7 +38,7 @@ for index, ax in enumerate(axs):
     
     sSFR = np.log10(sSFR)
     
-    Hist1, xedges, yedges = np.histogram2d(sSFR,Zstar,weights=Mstar,bins=(bins,bins))
+    Hist1, xedges, yedges = np.histogram2d(sSFR,Zstar,weights=Mstar,bins=(75,75))
     Hist2, _     , _      = np.histogram2d(sSFR,Zstar,bins=[xedges,yedges])
 
     Hist1 = np.transpose(Hist1)
@@ -62,7 +65,6 @@ for index, ax in enumerate(axs):
         y_axis = fixed_Z   [mass][mask]
             
         if (len(x_axis) != 0):
-            
             polyfit   = np.polyfit( x_axis, y_axis, 1 )
 
             y_to_plot = np.polyval(polyfit,x_axis)
@@ -76,9 +78,6 @@ fig.tight_layout()
 
 axs[0].set_ylabel(r'$\log(Z_*~[Z_\odot])$')
 
-p0 = axs[0].get_position().get_points().flatten()
-p1 = axs[1].get_position().get_points().flatten()
-p2 = axs[2].get_position().get_points().flatten()
 ax_cbar = fig.add_axes([0.2, 1., 0.6, 0.05])
 
 cb = plt.colorbar(plot, cax=ax_cbar,

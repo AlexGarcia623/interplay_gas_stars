@@ -1,3 +1,6 @@
+'''Module used to load EAGLE data from SQL query
+
+'''
 # EAGLE Subhalo Query
 import numpy as np
 import sys
@@ -6,7 +9,8 @@ from os import path, mkdir
 
 WHICH_SIM = "EAGLE".upper()
 
-EAGLE_SQL_TOOLS = '/home/alexgarcia/github/eagleSqlTools'
+# https://github.com/kyleaoman/eagleSqlTools
+EAGLE_SQL_TOOLS = '/home/alexgarcia/github/eagleSqlTools' 
 
 #########################################################################
 ################# YOU WILL PROBABLY HAVE TO CHANGE THIS #################
@@ -26,11 +30,9 @@ import eagleSqlTools as sql
 if !con:
     raise Exception('You need to make your own EAGLE username/password!: https://virgodb.dur.ac.uk/')
 
-
 if (WHICH_SIM == 'EAGLE'):
     SIM = 'RefL0100n1504'
-elif (WHICH_SIM == 'EAGLE-2'):
-    SIM = 'RefL0100n' # I don't think a lower-res version exists
+
 snaps = [28,19,15,12,10,8,6,5,4,3,2]
 
 for snap in snaps:
@@ -57,10 +59,6 @@ for snap in snaps:
         and SH.StarFormationRate > 0.0\
         and SH.MassType_Star > 1E8\
         and SH.SubGroupNumber = 0''' %(snap) 
-    
-        # and SH.StarFormationRate > 0.0\
-        # and SH.MassType_Star > 1E8\
-        # and SH.SubGroupNumber = 0''' %(snap) 
     
     print('Starting Query... snapshot %s' %snap)
     myData = sql.execute_query(con, myQuery)

@@ -13,6 +13,7 @@ All credit for simulation data goes to the respective collaborations: see [Illus
 ### Data Reduction
 
 !!! Not required to run the scripts to generate plots !!!
+
 !!! Is required if you would like to significantly alter selection criteria !!!
 
 Contains scripts used to generate data products from "raw" simulation data 
@@ -22,6 +23,12 @@ Contains scripts used to generate data products from "raw" simulation data
 Contains pdf versions of all figures
 
 ### Figure files
+
+Generate all Figures: 
+
+- make_all_figs.py -- Make all of the figures at once
+
+Each individual (in './Figures_py/' directory)
 
 - appendix_A1.py -- Generate Figure A1
 - appendix_A2.py -- Generate Figure A2
@@ -40,8 +47,13 @@ Contains pdf versions of all figures
 
 ### Non-Figure Files
 
-- getAlpha.py -- 
-- helpers.py -- Contains useful functions
+(see each file for the functions it provides and their uses)
+
+- getAlpha.py
+- getSlopes.py
+- helpers.py
+- plot_functions.py
+
 
 ### Toy Model
 

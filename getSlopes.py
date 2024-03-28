@@ -18,10 +18,13 @@ import matplotlib.gridspec as gridspec
 from scipy.interpolate import interp1d
 from scipy.stats import ks_2samp, iqr
 # Import from this library
-from helpers import (
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
+
+from interplay_gas_stars.helpers import (
     sfmscut, getMedians
 )
-from getAlpha import (
+from interplay_gas_stars.getAlpha import (
     switch_sim, whichSim2Tex
 )
 

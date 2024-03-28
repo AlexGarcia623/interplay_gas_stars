@@ -15,15 +15,20 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.colors import LogNorm,ListedColormap
 # Import from this library
-from plot_functions import (
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
+
+from interplay_gas_stars.plot_functions import (
     get_Z_Mstar_SFR, getScatter, skew, ztoSnaps, sSFRcut
 )
-from helpers import (
+from interplay_gas_stars.helpers import (
     estimateSkew, getMedians
 )
-from getAlpha import switch_sim
+from interplay_gas_stars.getAlpha import (
+    switch_sim
+)
 
-SAVEDIR = '../Figures (pdf)/' # Where to save files
+SAVEDIR = './Figures (pdf)/' # Where to save files
 
 fig = plt.figure(figsize=(18,9))
 widths=[1,1,1]

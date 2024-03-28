@@ -26,7 +26,12 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy.stats import norm, skewnorm
 # Import from this library
-from helpers import sfmscut, getMedians
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
+
+from interplay_gas_stars.helpers import (
+    sfmscut, getMedians
+)
 
 ###### My Custom rcParams ######
 mpl.rcParams['font.size'] = 15

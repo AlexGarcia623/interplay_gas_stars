@@ -1,7 +1,11 @@
+'''Module used for getting Illustris and TNG data
+
+'''
 import numpy as np
 import sys
 import h5py
-import illustris_python as il
+import illustris_python as il # https://github.com/AlexGarcia623/illustris_python
+## Note that I did not create illustris_python
 from os import path, mkdir
 
 WHICH_SIM = "tng".upper()
@@ -119,9 +123,8 @@ for snap in snaps:
 
     subs = grp_cat['GroupFirstSub']
 
-    subs = subs[(subs != 4294967295)] # Illustris weirdness...?
+    subs = subs[(subs != 4294967295)] # Illustris weirdness
 
-    # print (sub_cat['SubhaloMassType']).shape
     gas_mass  = sub_cat['SubhaloMassType'][subs,0] * 1.00E+10 / h
     star_mass = sub_cat['SubhaloMassType'][subs,4] * 1.00E+10 / h
     SFR       = sub_cat['SubhaloSFR'][subs]

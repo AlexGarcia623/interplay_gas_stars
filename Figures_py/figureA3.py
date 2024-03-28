@@ -7,13 +7,16 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm,ListedColormap
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
-from plot_functions import get_Z_Mstar_SFR, ztoSnaps, sSFRcut
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
 
-SAVEDIR = '../Figures (pdf)/'
+from interplay_gas_stars.plot_functions import (
+    get_Z_Mstar_SFR, ztoSnaps, sSFRcut
+)
+
+SAVEDIR = './Figures (pdf)/'
 
 fig, axs = plt.subplots(1, 3, figsize=(10,3.5), sharey=True, sharex=True)
-
-bins = 75
 
 ##### CHANGE ME TO GET DIFFERENT REDSHIFT #####
 _100_50_snap_ = 99
@@ -35,7 +38,7 @@ _100_50_sim_names_ = [r'${\rm TNG}100-1$',r'${\rm TNG}50-1$',r'${\rm TNG}50-2$']
 for index, ax in enumerate(axs):
     Zstar, Mstar, sSFR = get_Z_Mstar_SFR( _100_50_comp_dirs_ [index], which='stars')
 
-    Hist1, xedges, yedges = np.histogram2d(Mstar,Zstar,weights=sSFR,bins=(bins,bins))
+    Hist1, xedges, yedges = np.histogram2d(Mstar,Zstar,weights=sSFR,bins=(75,75))
     Hist2, _     , _      = np.histogram2d(Mstar,Zstar,bins=[xedges,yedges])
 
     Hist1 = np.transpose(Hist1)

@@ -4,11 +4,16 @@ import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
 
-from getAlpha import get_alpha
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
 
+from interplay_gas_stars.getAlpha import (
+    get_alpha
+)
+    
 m_star_min, m_star_max = 8.0, 12.0
 
-SAVEDIR = '../Figures (pdf)/'
+SAVEDIR = './Figures (pdf)/'
 
 mpl.rcParams['font.size'] = 20
 fig, axs = plt.subplots(3, 1, figsize=(8,8), sharex=True, sharey=True)
@@ -20,7 +25,6 @@ shape = ['^','o','*','v']
 redshifts = np.arange(0,9)
 
 for index, THRESHOLD in enumerate(thresholds):
-    
     EAGLE, EAGLE_lower, EAGLE_upper = get_alpha( 'EAGLE', THRESHOLD=THRESHOLD,
                                                  m_star_min=m_star_min, m_star_max=m_star_max)
     TNG, TNG_lower, TNG_upper = get_alpha( 'TNG', THRESHOLD=THRESHOLD,
@@ -45,7 +49,7 @@ axs[2].text(0.5,0.85,r'${\rm Illustris}$',ha='center', transform=axs[2].transAxe
 
 axs[0].set_ylim(-0.15,1.15)
     
-leg = axs[1].legend(frameon=False, fontsize=15, labelspace=0.0)
+leg = axs[1].legend(frameon=False, fontsize=15, labelspacing=0.0)
 colors = ['C' + str(i) for i in range(0,9)] + ['k'] + ['teal']
 for index, text in enumerate(leg.get_texts()):
     text.set_color(colors[index])

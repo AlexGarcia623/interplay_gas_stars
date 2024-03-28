@@ -13,16 +13,18 @@ import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
 
 # Import from this library
-from plot_functions import (
+from interplay_gas_stars.plot_functions import (
     get_Z_Mstar_SFR, medianZR, ztoSnaps, sSFRcut
 )
-from Data.additional_data import (
+from interplay_gas_stars.Data.additional_data import (
     G05_masses, G05_metals, C19_masses, C19_metals, K22_masses, K22_metals
 )
 
-SAVEDIR = '../Figures (pdf)/' # Where to save files
+SAVEDIR = './Figures (pdf)/' # Where to save files
 
 # Simulation names (same as Data directories)
 SIMS = ['TNG','ORIGINAL','EAGLE']

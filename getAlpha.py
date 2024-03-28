@@ -31,7 +31,10 @@ import matplotlib.gridspec as gridspec
 from scipy.interpolate import interp1d
 from scipy.stats import ks_2samp, iqr
 # Import from this library
-from helpers import sfmscut
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
+
+from interplay_gas_stars.helpers import sfmscut
 
 ###### My Custom rcParams ######
 fontsize = 20
@@ -421,7 +424,7 @@ def plot(sim, name, redshift, m_star_min=8.0, m_star_max=12.0,
     
     snap = snapshots[redshift]
 
-    currentDir = BLUE_DIR + 'data/' + 'snap%s/' %snap
+    currentDir = BLUE_DIR + 'snap%s/' %snap
 
     Zgas      = np.load( currentDir + 'Zgas.npy' )
     Zstar     = np.load( currentDir + 'Zstar.npy' ) 

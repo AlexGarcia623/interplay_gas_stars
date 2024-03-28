@@ -13,9 +13,12 @@ import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
 # Import from this library
-from getAlpha import get_alpha
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
 
-SAVEDIR = '../Figures (pdf)/' # Where to save files
+from interplay_gas_stars.getAlpha import get_alpha
+
+SAVEDIR = './Figures (pdf)/' # Where to save files
 
 # Simulation names (same as Data directories)
 sims = ['ORIGINAL','TNG','EAGLE']

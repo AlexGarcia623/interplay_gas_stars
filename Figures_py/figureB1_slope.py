@@ -4,13 +4,17 @@ import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
 
-from getSlopes import get_slopes
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
 
-SAVEDIR = '../Figures (pdf)/'
+from interplay_gas_stars.getSlopes import (
+    get_slopes
+)
+
+SAVEDIR = './Figures (pdf)/'
 
 mpl.rcParams['font.size'] = 20
 fig, axs = plt.subplots(3, 1, figsize=(8,8), sharex=True, sharey=True)
-
 
 thresholds = [-1.00E-01,-5.00E-01,-1.00E+0,-np.inf]
 labels = [r'$0.1~{\rm dex}$',r'$0.5~{\rm dex}~({\rm fiducial})$',r'$1.0~{\rm dex}$',r'${\rm SFR} > 0$']
@@ -19,7 +23,6 @@ shape = ['^','o','*','v']
 redshifts = np.arange(0,9)
 
 for index, THRESHOLD in enumerate(thresholds):
-    
     EAGLE = get_slopes('eagle',THRESHOLD=THRESHOLD)
     ORIGINAL = get_slopes('original',THRESHOLD=THRESHOLD)
     TNG = get_slopes('tng',THRESHOLD=THRESHOLD)
@@ -46,4 +49,3 @@ for index, text in enumerate(leg.get_texts()):
 plt.tight_layout()
 plt.subplots_adjust(hspace=0.0,wspace=0.0)
 plt.savefig(SAVEDIR + 'FigureB1_slope.pdf')
-    

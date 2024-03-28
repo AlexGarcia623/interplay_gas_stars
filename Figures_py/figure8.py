@@ -13,11 +13,16 @@ import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
 # Import from this library
-from getSlopes import get_slopes
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
+
+from interplay_gas_stars.getSlopes import (
+    get_slopes
+)
 
 mpl.rcParams['font.size']=16 # Change font size for this file
 
-SAVEDIR = '../Figures (pdf)/' # Where to save files
+SAVEDIR = './Figures (pdf)/' # Where to save files
 
 fig = plt.figure(figsize=(8,4))
 

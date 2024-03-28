@@ -15,16 +15,19 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm,ListedColormap
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 # Import from this library
-from plot_functions import (
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
+
+from interplay_gas_stars.plot_functions import (
     get_Z_Mstar_SFR, ztoSnaps, sSFRcut
 )
-from Data.additional_data import (
+from interplay_gas_stars.Data.additional_data import (
     dr18_masses, dr18_metals, dr18_avg_sSFR
 )
 
 mpl.rcParams['font.size']=18 ## Modify font size for this file only
 
-SAVEDIR = '../Figures (pdf)/' # Where to save files
+SAVEDIR = './Figures (pdf)/' # Where to save files
 
 # Simulation names (same as Data directories)
 SIMS       = ['TNG','ORIGINAL','EAGLE']

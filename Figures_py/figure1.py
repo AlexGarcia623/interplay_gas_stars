@@ -13,10 +13,13 @@ import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
 # Import from this library
-from plot_functions import (
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
+
+from interplay_gas_stars.plot_functions import (
     get_Z_Mstar_SFR, ztoSnaps, sSFRcut
 )
-from Data.additional_data import (
+from interplay_gas_stars.Data.additional_data import (
     G05_masses, G05_metals, P08_masses, P08_metals
 )
 
